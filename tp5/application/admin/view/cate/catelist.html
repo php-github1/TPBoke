@@ -1,0 +1,165 @@
+    {include file='public/_head'}
+    <!-- Main Container -->
+    <div class="main-container container-fluid">
+        <!-- Page Container -->
+        <div class="page-container">
+
+            <!-- Page Sidebar -->
+                {include file='public/_left'}
+            <!-- /Page Sidebar -->
+            <!-- Page Content -->
+            <div class="page-content">
+                <!-- Page Breadcrumb -->
+                <div class="page-breadcrumbs">
+                    <ul class="breadcrumb">
+                        <li class="active">
+                            <i class="fa fa-home"></i>&nbsp;栏目管理
+                        </li>
+                        <li>栏目列表</li>
+                    </ul>
+                </div>
+                <!-- /Page Breadcrumb -->
+                <!-- Page Body -->
+                <div class="page-body">
+                	<a href="cateadd.html" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i>&nbsp;栏目添加</a>
+                	<div class="row">
+                		<div class="col-xs-12">
+                			<div class="widget">
+                				<div class="widget-header">
+                					<span class="widget-caption">栏目列表</span>
+                					<div class="widget-buttons">
+                					<!--  //自带的分页方法
+                					php5.1不需要raw,其他情况$cates->render()|raw  -->
+                					     <ul class="pagination">
+                						  {$cates->render()|replace}
+                						 </ul>
+                					</div>
+                				</div>
+                				<div class="widget-body">
+                					<table class="table table-hover table-bordered">
+                						<thead>
+                							<tr>
+                								<th>排序</th>
+                								<th>栏目名称</th>
+                								<th>操作</th>
+                							</tr>
+                						</thead>
+                						<tbody>
+                						{volist name="cates" id="vo"}
+                							<tr>
+                								<td><input type="text" name="sort" dataid="{$vo.id}" value="{$vo.sort}" size="1"/></td>
+                								<td>{$vo.catename}</td>
+                								<td>
+                									<a href="{:url('admin/cate/edit',['id' => $vo.id])}" class="btn btn-azure btn-xs">编辑</a>
+                									<a href="#" class="btn btn-danger btn-xs cateDel" dataid="{$vo.id}">删除</a>
+                								</td>
+                							</tr>
+                					    {/volist}
+                						</tbody>
+                					</table>
+                				</div>
+                			</div>
+                		</div>
+                	</div>
+                </div>
+                <!-- /Page Body -->
+            </div>
+            <!-- /Page Content -->
+
+        </div>
+        <!-- /Page Container -->
+        <!-- Main Container -->
+
+    </div>
+
+    <script src="__STATIC__/admin/js/skins.min.js"></script>
+    <!--Basic Scripts-->
+    <script src="__STATIC__/admin/js/jquery.min.js"></script>
+    <script src="__STATIC__/admin/js/bootstrap.min.js"></script>
+    <script src="__STATIC__/admin/js/slimscroll/jquery.slimscroll.min.js"></script>
+    <!--Beyond Scripts-->
+    <script src="__STATIC__/admin/js/beyond.js"></script>
+    <script src="__STATIC__/lib/layer/layer.js"></script>
+    <script>
+        $(window).bind("load", function () {
+
+            /*Sets Themed Colors Based on Themes*/
+            themeprimary = getThemeColorFromCss('themeprimary');
+            themesecondary = getThemeColorFromCss('themesecondary');
+            themethirdcolor = getThemeColorFromCss('themethirdcolor');
+            themefourthcolor = getThemeColorFromCss('themefourthcolor');
+            themefifthcolor = getThemeColorFromCss('themefifthcolor');
+
+        });
+    </script>
+    <script>
+    $(function () {
+    	/* 此句是用来添加分页处的css属性，变色时分页小图标也得变色 */
+       $('.pagination').addClass('pagination-sm');
+    	/* 指input标签下的name=sort改变时 */
+       $('[name=sort]').change(function () {
+           var sort = $(this).val();
+           var id = $(this).attr('dataid');
+           $.ajax({
+               url:"{:url('admin/cate/sort')}",
+               type:'post',
+               data:{id:id, sort:sort},
+               dataType:'json',
+               success:function (data) {
+                   if (data.code == 1) {
+                       layer.msg(data.msg, {
+                           icon:6,
+                           time:2000
+                       }, function () {
+                           location.href = location.href;
+                       });
+                   }else {
+                       layer.open({
+                           title:'排序失败',
+                           content:data.msg,
+                           icon:5,
+                           anim:6
+                       });
+                   }
+               }
+           });
+       });
+       $('.cateDel').click(function () {
+           var id = $(this).attr('dataid');
+           layer.confirm('删除栏目时对应的文章也会删除，您确定要删除吗？', {
+               title:'删除栏目',
+               icon:3,
+               anim:6
+           }, function (index) {
+               layer.close(index);//关掉询问是否确认删除弹窗
+               $.ajax({
+                   url:"{:url('admin/cate/Del')}",
+                   type:'post',
+                   data:{id:id},
+                   dataType:'json',
+                   success:function (data) {
+                       if (data.code == 1) {
+                           layer.msg(data.msg, {
+                               icon:6,
+                               time:2000
+                           }, function () {
+                               location.href = data.url;
+                           });
+                       }else {
+                           layer.open({
+                               title:'操作失败',
+                               content:data.msg,
+                               icon:5,
+                               anim:6
+                           });
+                       }
+                   }
+               });
+           });
+           return false;
+       });
+    });
+    </script>
+</body>
+<!--  /Body -->
+</html>
